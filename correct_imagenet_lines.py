@@ -30,13 +30,14 @@ sc.setLogLevel("ERROR")
 def getLines(txtFile):
 	with open(txtFile) as f:
 		lines = f.read().splitlines()
+	return lines
 
 
 def canResize(filename):
 	try:
 		Image.open(filename).resize(224, 224)
 		return True
-	except ValueError:
+	except:
 		return False
 
 
@@ -47,7 +48,7 @@ def correctedLine(line):
 	return fileNames[0] + ' ' + elem[1] and canResize(fileNames[0]) if len(fileNames) == 1 else 'INVALID'
 
 	
-def correctFile(trainFile)
+def correctFile(trainFile):
 	sc.parallelize(getLines(trainFile)).map(lambda line : correctedLine(line)).collect()
 	lines = [ line for line in lines if line != 'INVALID' ]
 	with open(trainFile) as f:
