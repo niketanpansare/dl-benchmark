@@ -45,7 +45,7 @@ def correctedLine(line):
 	elem = line.split(' ')
 	fileWithoutExtension = os.path.splitext(os.path.join(os.environ['IMAGENET_ROOT'], 'raw_images', elem[0]))[0]
 	fileNames =  glob.glob(fileWithoutExtension + '.*')
-	return fileNames[0] + ' ' + elem[1] and canResize(fileNames[0]) if len(fileNames) == 1 else 'INVALID'
+	return fileNames[0] + ' ' + elem[1] if len(fileNames) == 1 and canResize(fileNames[0]) else 'INVALID'
 
 	
 def correctFile(trainFile):
