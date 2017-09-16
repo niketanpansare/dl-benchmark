@@ -38,6 +38,7 @@ cd caffe
 sudo yum install protobuf-devel leveldb-devel snappy-devel opencv-devel boost-devel hdf5-devel
 sudo yum install gflags-devel glog-devel lmdb-devel
 cp Makefile.config.example Makefile.config
+# For fair comparison replace 'float' in tools/caffe.cpp with 'double'
 # Set following in Makefile.config
 # BLAS := open
 # BLAS_INCLUDE := /opt/OpenBLAS/include/
