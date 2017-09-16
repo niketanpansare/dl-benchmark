@@ -49,9 +49,9 @@ def correctedLine(line):
 
 	
 def correctFile(trainFile):
-	sc.parallelize(getLines(trainFile)).map(lambda line : correctedLine(line)).collect()
+	lines = sc.parallelize(getLines(trainFile)).map(lambda line : correctedLine(line)).collect()
 	lines = [ line for line in lines if line != 'INVALID' ]
-	with open(trainFile) as f:
+	with open(trainFile, "w") as f:
 		for line in lines:
 			f.write("%s\n" % line)
 
