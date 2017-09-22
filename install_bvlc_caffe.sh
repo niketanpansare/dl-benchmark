@@ -37,6 +37,7 @@ git clone https://github.com/BVLC/caffe.git
 cd caffe 
 sudo yum install protobuf-devel leveldb-devel snappy-devel opencv-devel boost-devel hdf5-devel
 sudo yum install gflags-devel glog-devel lmdb-devel
+pip install scikit-image lmdb protobuf 
 cp Makefile.config.example Makefile.config
 # For fair comparison replace 'float' in tools/caffe.cpp with 'double'
 # Set following in Makefile.config
@@ -48,6 +49,7 @@ echo 'Please set following in Makefile.config:'
 echo 'BLAS := open'
 echo 'BLAS_INCLUDE := /opt/OpenBLAS/include/'
 echo 'BLAS_LIB := /opt/OpenBLAS/lib/'
+# On many system, NumPy may be installed at  /usr/lib64/python2.7/site-packages/numpy/core/include. So, you may also want to modify PYTHON_INCLUDE
 echo 'Finally, do make all and make pycaffe'
 # make all
 # make pycaffe
