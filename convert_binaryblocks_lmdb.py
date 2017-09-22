@@ -43,14 +43,14 @@ lmdb_txn = lmdb_env.begin(write=True)
 datum = caffe.proto.caffe_pb2.Datum()
 
 start_index = 1
-ylen = float(ml.execute(dml('y = read(' + input_file_y + '); ylen = nrow(y)').output('ylen')).get('ylen'))
+ylen = float(ml.execute(dml('y = read("' + input_file_y + '"); ylen = nrow(y)').output('ylen')).get('ylen'))
 print('Number of data items:' + str(ylen))
 while start_index < ylen:
 	end_index = start_index + BUFFER_SIZE
 	if end_index > ylen:
 		end_index = ylen	
-	dmlStrX = 'X = read(' + input_file_x + '); X = X[' + str(start_index) + ':' + str(end_index) + ',]'
-	dmlStrY = 'y = read(' + input_file_y + '); y = y[' + str(start_index) + ':' + str(end_index) + ',]'
+	dmlStrX = 'X = read("' + input_file_x + '"); X = X[' + str(start_index) + ':' + str(end_index) + ',]'
+	dmlStrY = 'y = read("' + input_file_y + '"); y = y[' + str(start_index) + ':' + str(end_index) + ',]'
 	X = ml.execute(dml(dmlStrX).output('X')).get('X').toNumPy()
 	y = ml.execute(dml(dmlStrX).output('y')).get('y').toNumPy()
 	X = X.reshape((-1, num_channels, height, width))
