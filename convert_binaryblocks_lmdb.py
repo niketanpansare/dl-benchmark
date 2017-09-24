@@ -19,10 +19,18 @@
 #
 #-------------------------------------------------------------
 
+# Usage:
+# For classification problems,
+# $SPARK_HOME/bin/spark-submit --driver-memory 30g convert_binaryblocks_lmdb.py X.train.mtx Y.train.mtx train.lmdb 64 $NUM_CHANNELS $HEIGHT $WIDTH
+#
+# For image segmentation / multi-label problems, generate two lmdbs:
+# $SPARK_HOME/bin/spark-submit --driver-memory 30g convert_binaryblocks_lmdb.py X.train.mtx None X.train.lmdb 64 $NUM_CHANNELS $HEIGHT $WIDTH
+# $SPARK_HOME/bin/spark-submit --driver-memory 30g convert_binaryblocks_lmdb.py Y.train.mtx None Y.train.lmdb 64 $NUM_LABELS 1 1
 import lmdb, caffe
 import numpy as np
 import sys
 input_file_x = sys.argv[1]
+# Use input_file_y == 'None' for image segmentation problem
 input_file_y = sys.argv[2]
 output_lmdb_file = sys.argv[3]
 BUFFER_SIZE = int(sys.argv[4])
@@ -43,21 +51,24 @@ lmdb_txn = lmdb_env.begin(write=True)
 datum = caffe.proto.caffe_pb2.Datum()
 
 start_index = 1
-ylen = float(ml.execute(dml('y = read("' + input_file_y + '"); ylen = nrow(y)').output('ylen')).get('ylen'))
-print('Number of data items:' + str(ylen))
-while start_index < ylen:
+xlen = float(ml.execute(dml('X = read("' + input_file_x + '"); xlen = nrow(X)').output('xlen')).get('xlen'))
+print('Number of data items:' + str(xlen))
+while start_index < xlen:
 	end_index = start_index + BUFFER_SIZE
-	if end_index > ylen:
-		end_index = ylen	
+	if end_index > xlen:
+		end_index = xlen	
 	dmlStrX = 'X = read("' + input_file_x + '"); X = X[' + str(start_index) + ':' + str(end_index) + ',]'
-	dmlStrY = 'y = read("' + input_file_y + '"); y = y[' + str(start_index) + ':' + str(end_index) + ',]'
 	X = ml.execute(dml(dmlStrX).output('X')).get('X').toNumPy()
-	y = ml.execute(dml(dmlStrX).output('y')).get('y').toNumPy()
 	X = X.reshape((-1, num_channels, height, width))
 	batch_size = X.shape[0]
-	y = y.reshape((batch_size, -1))
+	if input_file_y != 'None':
+		dmlStrY = 'y = read("' + input_file_y + '"); y = y[' + str(start_index) + ':' + str(end_index) + ',]'
+		y = ml.execute(dml(dmlStrY).output('y')).get('y').toNumPy()
+		y = y.reshape((batch_size, -1))
+	else:
+		y = None
 	for i in range(batch_size):
-		datum = caffe.io.array_to_datum(X[i], y[i])
+		datum = caffe.io.array_to_datum(X[i], y[i]) if y is not None else caffe.io.array_to_datum(X[i])
 		keystr = '{:0>8d}'.format(i+start_index)
 		lmdb_txn.put( keystr, datum.SerializeToString() )
 	lmdb_txn.commit()
